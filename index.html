@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GMAIL SUBMIT</title>
+    <title>GMAIL SELL</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -20,45 +19,37 @@
             --bg-primary: #f6f8fc;
             --bg-secondary: #ffffff;
             --bg-tertiary: #eaf1fb;
-
-            /* Telegram-flavored accent (kept as --accent-blue so nothing
-               that references it needs to change) */
-            --accent-blue: #29b6f6;
-            --accent-blue-deep: #1c93d6;
-            --accent-gradient: linear-gradient(135deg, #4dc8ff 0%, #29b6f6 55%, #1c93d6 100%);
-
+            
+            --accent-blue: #1a73e8;
             --accent-green: #34a853;
             --accent-yellow: #f9ab00;
             --accent-red: #ea4335;
-
+            
             --text-primary: #202124;
             --text-secondary: #5f6368;
             --text-tertiary: #80868b;
-
+            
             --border-color: #dadce0;
             --border-light: #e8eaed;
-
+            
             --success: #34a853;
             --success-bg: rgba(52, 168, 83, 0.1);
             --warning: #f9ab00;
             --warning-bg: rgba(249, 171, 0, 0.1);
             --error: #ea4335;
             --error-bg: rgba(234, 67, 53, 0.1);
-            --info: #29b6f6;
-            --info-bg: rgba(41, 182, 246, 0.1);
-
+            --info: #1a73e8;
+            --info-bg: rgba(26, 115, 232, 0.1);
+            
             --shadow-sm: 0 1px 2px 0 rgba(60, 64, 67, 0.1), 0 1px 3px 1px rgba(60, 64, 67, 0.08);
             --shadow-md: 0 1px 3px 0 rgba(60, 64, 67, 0.15), 0 4px 8px 3px rgba(60, 64, 67, 0.1);
-            --shadow-lg: 0 12px 28px rgba(41, 182, 246, 0.16), 0 2px 6px rgba(60, 64, 67, 0.08);
-
+            
             --radius-sm: 8px;
             --radius-md: 12px;
             --radius-lg: 16px;
             --radius-xl: 24px;
 
-            --mono: 'JetBrains Mono', 'SFMono-Regular', Menlo, monospace;
-
-            /* skeleton (light theme) */
+            /* skeleton only — needed for the new loading state */
             --sk-base: #e6edf7;
             --sk-shine: #ffffff;
         }
@@ -73,8 +64,8 @@
 
         /* ================================================================
            SPLASH / SKELETON LOADER
-           Mirrors this page's own layout (header / reward+time cards /
-           submit card / history list) instead of a generic placeholder.
+           Mirrors this page's own layout (header / info cards / submit
+           card / history list) instead of a generic placeholder.
         ================================================================= */
         .splash {
             position: fixed;
@@ -131,7 +122,7 @@
         .sk-header-left { display: flex; align-items: center; gap: 12px; }
         .sk-brand-icon { width: 42px; height: 42px; border-radius: var(--radius-md); flex-shrink: 0; }
         .sk-header-lines { display: flex; flex-direction: column; gap: 8px; }
-        .sk-user-chip { width: 118px; height: 44px; border-radius: 24px; flex-shrink: 0; }
+        .sk-user-chip { width: 96px; height: 40px; border-radius: 24px; flex-shrink: 0; }
 
         .splash-inner {
             max-width: 600px;
@@ -153,7 +144,7 @@
             padding: 18px;
         }
 
-        .sk-info-card-icon { width: 40px; height: 40px; border-radius: var(--radius-md); margin-bottom: 14px; }
+        .sk-info-card-icon { width: 40px; height: 40px; border-radius: var(--radius-md); margin-bottom: 12px; }
         .sk-info-label { width: 70%; height: 9px; border-radius: 5px; margin-bottom: 10px; }
         .sk-info-value { width: 55%; height: 22px; border-radius: 7px; }
 
@@ -165,7 +156,7 @@
             margin-bottom: 24px;
         }
 
-        .sk-submit-header { height: 78px; }
+        .sk-submit-header { height: 68px; }
         .sk-submit-body { padding: 20px; }
         .sk-input-bar { height: 50px; border-radius: var(--radius-md); margin-bottom: 16px; }
         .sk-submit-btn-bar { height: 52px; border-radius: var(--radius-md); margin-top: 4px; }
@@ -233,12 +224,12 @@
         .brand-icon {
             width: 42px;
             height: 42px;
-            background: var(--accent-gradient);
+            background: var(--accent-blue);
             border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 6px 16px rgba(41, 182, 246, 0.30);
+            box-shadow: var(--shadow-sm);
         }
 
         .brand-icon svg {
@@ -271,7 +262,7 @@
         .user-avatar {
             width: 32px;
             height: 32px;
-            background: var(--accent-gradient);
+            background: var(--accent-blue);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -293,7 +284,6 @@
         .user-info .user-id {
             font-size: 11px;
             color: var(--text-tertiary);
-            font-family: var(--mono);
         }
 
         /* ========== Main Content ========== */
@@ -317,32 +307,13 @@
             padding: 18px;
             border: 1px solid var(--border-light);
             box-shadow: var(--shadow-sm);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .info-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-        }
-
-        .info-card.reward::before {
-            background: var(--success);
-        }
-
-        .info-card.time::before {
-            background: var(--accent-gradient);
         }
 
         .info-card-header {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
 
         .info-card-icon {
@@ -352,7 +323,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
         }
 
         .info-card-icon svg {
@@ -366,114 +336,58 @@
         .info-card-icon.green svg { fill: var(--success); }
 
         .info-card-icon.blue {
-            background: var(--accent-gradient);
-            box-shadow: 0 6px 14px rgba(41, 182, 246, 0.30);
+            background: var(--info-bg);
         }
-        .info-card-icon.blue svg { fill: #ffffff; }
+        .info-card-icon.blue svg { fill: var(--info); }
 
         .info-card-label {
             font-size: 11px;
-            font-weight: 700;
+            font-weight: 600;
             color: var(--text-tertiary);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
         }
 
         .info-card-value {
-            font-family: var(--mono);
             font-size: 22px;
             font-weight: 800;
             color: var(--text-primary);
-            letter-spacing: -0.3px;
         }
 
         .info-card-value.green {
             color: var(--success);
         }
 
-        .info-card-caption {
-            display: block;
-            font-size: 11px;
-            font-weight: 500;
-            color: var(--text-tertiary);
-            margin-top: 4px;
-        }
-
         /* ========== Submit Form Card ========== */
         .submit-card {
             background: var(--bg-secondary);
             border-radius: var(--radius-xl);
-            border: 1px solid var(--border-light);
+            border: 2px solid var(--accent-blue);
             overflow: hidden;
-            box-shadow: var(--shadow-lg);
+            box-shadow: var(--shadow-md);
             margin-bottom: 24px;
         }
 
         .submit-card-header {
-            background: var(--accent-gradient);
-            padding: 22px 20px;
+            background: var(--accent-blue);
+            padding: 20px;
             color: white;
             text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .submit-card-header::before {
-            content: '';
-            position: absolute;
-            width: 160px;
-            height: 160px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.14);
-            top: -90px;
-            right: -50px;
-        }
-
-        .submit-card-header::after {
-            content: '';
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.10);
-            bottom: -60px;
-            left: -30px;
-        }
-
-        .submit-card-header-icon {
-            width: 44px;
-            height: 44px;
-            background: rgba(255, 255, 255, 0.20);
-            border: 1px solid rgba(255, 255, 255, 0.30);
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 10px;
-            position: relative;
-        }
-
-        .submit-card-header-icon svg {
-            width: 22px;
-            height: 22px;
-            fill: white;
         }
 
         .submit-card-header h2 {
             font-size: 18px;
             font-weight: 700;
             margin-bottom: 4px;
-            position: relative;
         }
 
         .submit-card-header p {
             font-size: 13px;
-            opacity: 0.92;
-            position: relative;
+            opacity: 0.9;
         }
 
         .submit-card-body {
-            padding: 22px 20px;
+            padding: 20px;
         }
 
         /* Pause Notice */
@@ -605,7 +519,7 @@
         .submit-btn {
             width: 100%;
             padding: 16px 24px;
-            background: var(--accent-gradient);
+            background: var(--accent-blue);
             border: none;
             border-radius: var(--radius-md);
             color: white;
@@ -619,11 +533,10 @@
             gap: 10px;
             transition: all 0.2s ease;
             margin-top: 8px;
-            box-shadow: 0 8px 22px rgba(41, 182, 246, 0.30);
         }
 
         .submit-btn:hover {
-            filter: brightness(1.04);
+            background: #1557b0;
         }
 
         .submit-btn:active {
@@ -632,7 +545,6 @@
 
         .submit-btn:disabled {
             background: var(--text-tertiary);
-            box-shadow: none;
             cursor: not-allowed;
         }
 
@@ -720,7 +632,7 @@
             font-size: 13px;
             font-weight: 700;
             color: var(--success);
-            font-family: var(--mono);
+            font-family: monospace;
         }
 
         /* ========== History Section ========== */
@@ -801,7 +713,7 @@
             font-size: 14px;
             font-weight: 700;
             color: var(--text-primary);
-            font-family: var(--mono);
+            font-family: monospace;
         }
 
         .history-item-time {
@@ -978,7 +890,7 @@
             .brand-text span {
                 display: none;
             }
-
+            
             .info-card-value {
                 font-size: 20px;
             }
@@ -988,16 +900,16 @@
 <body>
 
     <!-- ================= SKELETON SPLASH SCREEN ================= -->
-    <!-- Mirrors this page's own layout (header / reward+time cards /
-         submit card / history list) rather than a generic placeholder. -->
+    <!-- Mirrors this page's own layout (header / info cards / submit
+         card / history list) rather than a generic placeholder. -->
     <div class="splash" id="splash">
         <div class="sk-header-bar">
             <div class="sk-header-content">
                 <div class="sk-header-left">
                     <div class="sk sk-brand-icon"></div>
                     <div class="sk-header-lines">
-                        <div class="sk sk-line" style="width: 120px;"></div>
-                        <div class="sk sk-line" style="width: 78px; height: 9px;"></div>
+                        <div class="sk sk-line" style="width: 110px;"></div>
+                        <div class="sk sk-line" style="width: 74px; height: 9px;"></div>
                     </div>
                 </div>
                 <div class="sk sk-user-chip"></div>
@@ -1065,7 +977,7 @@
                         <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
                     </div>
                     <div class="brand-text">
-                        <h1>GMAIL SUBMIT</h1>
+                        <h1>GMAIL SELL</h1>
                         <span>Submit & Earn</span>
                     </div>
                 </div>
@@ -1074,7 +986,6 @@
                         <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                     </div>
                     <div class="user-info">
-                        <div class="user-name" id="user-name">Loading...</div>
                         <div class="user-id" id="user-uid">UID: ------</div>
                     </div>
                 </div>
@@ -1098,17 +1009,16 @@
 
             <!-- Gmail Info Cards -->
             <div class="info-cards">
-                <div class="info-card reward">
+                <div class="info-card">
                     <div class="info-card-header">
                         <div class="info-card-icon green">
                             <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
                         </div>
-                        <span class="info-card-label">GM Reward</span>
+                        <span class="info-card-label">Gmail Reward</span>
                     </div>
                     <div class="info-card-value green" id="gmail-price">$Loading...</div>
-                    <span class="info-card-caption">Per Approved Gmail</span>
                 </div>
-                <div class="info-card time">
+                <div class="info-card">
                     <div class="info-card-header">
                         <div class="info-card-icon blue">
                             <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
@@ -1116,16 +1026,12 @@
                         <span class="info-card-label">Review Time</span>
                     </div>
                     <div class="info-card-value" id="review-time">Loading...</div>
-                    <span class="info-card-caption">Processing Time</span>
                 </div>
             </div>
 
             <!-- Submit Form Card -->
             <div class="submit-card">
                 <div class="submit-card-header">
-                    <div class="submit-card-header-icon">
-                        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                    </div>
                     <h2>Submit Your Gmail</h2>
                     <p>Fill in the details below to submit your gmail proof</p>
                 </div>
@@ -1203,7 +1109,6 @@
         let gmailHistory = [];
 
         // DOM Elements
-        const userNameEl = document.getElementById('user-name');
         const userUidEl = document.getElementById('user-uid');
         const dynamicFields = document.getElementById('dynamic-fields');
         const submitBtn = document.getElementById('submit-btn');
@@ -1219,7 +1124,7 @@
         const appContainerEl = document.getElementById('app-container');
         const SPLASH_MIN_MS = 2400;
         const splashStartedAt = Date.now();
-        const loadFlags = { username: false, settings: false, fields: false, history: false };
+        const loadFlags = { settings: false, fields: false, history: false };
 
         function markLoaded(key) {
             loadFlags[key] = true;
@@ -1227,7 +1132,7 @@
         }
 
         function maybeRevealApp() {
-            const allLoaded = loadFlags.username && loadFlags.settings && loadFlags.fields && loadFlags.history;
+            const allLoaded = loadFlags.settings && loadFlags.fields && loadFlags.history;
             if (!allLoaded) return;
 
             const elapsed = Date.now() - splashStartedAt;
@@ -1247,7 +1152,6 @@
             userUidEl.textContent = 'Not Found';
             showToast('User ID not found', 'error');
             // Nothing to fetch without an ID — reveal after the minimum delay only.
-            loadFlags.username = true;
             loadFlags.settings = true;
             loadFlags.fields = true;
             loadFlags.history = true;
@@ -1255,16 +1159,9 @@
         }
 
         function initializeApp() {
-            let usernameFirstLoad = true;
             let settingsFirstLoad = true;
             let fieldsFirstLoad = true;
             let historyFirstLoad = true;
-
-            // Load user data
-            database.ref('users/' + telegramId + '/username').on('value', (snapshot) => {
-                userNameEl.textContent = snapshot.val() || 'User';
-                if (usernameFirstLoad) { usernameFirstLoad = false; markLoaded('username'); }
-            });
 
             // Load admin settings
             database.ref('admin_settings').on('value', (snapshot) => {
@@ -1523,14 +1420,6 @@
         function hideToast() {
             document.getElementById('toast').classList.remove('show');
         }
-
-        // Telegram Mini App native integration (presentation only — no logic change)
-        if (window.Telegram && window.Telegram.WebApp) {
-            try {
-                window.Telegram.WebApp.ready();
-                window.Telegram.WebApp.expand();
-            } catch (e) { /* not running inside Telegram, ignore */ }
-        }
     </script>
 </body>
-</html>
+    </html>

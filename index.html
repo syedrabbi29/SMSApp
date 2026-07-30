@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Withdraw</title>
+    <title>TASK SUBMIT</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -17,44 +17,50 @@
         }
 
         :root {
-            /* ===== Telegram-native dark palette ===== */
-            --bg-primary: #0e1621;
-            --bg-secondary: #17212b;
-            --bg-card: #1b2836;
-            --bg-card-2: #1f2e3d;
-            --bg-input: #101923;
+            --bg-primary: #f6f8fc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #eaf1fb;
 
-            --accent-1: #34b7f1;
-            --accent-2: #2ea6ff;
-            --accent-3: #1c8adb;
-            --accent-gradient: linear-gradient(135deg, #3fc0ff 0%, #2ea6ff 50%, #1c8adb 100%);
-            --card-gradient: linear-gradient(160deg, rgba(46, 166, 255, 0.10) 0%, rgba(46, 166, 255, 0.02) 55%, transparent 100%);
+            /* Telegram-flavored accent (kept as --accent-blue so nothing
+               that references it needs to change) */
+            --accent-blue: #29b6f6;
+            --accent-blue-deep: #1c93d6;
+            --accent-gradient: linear-gradient(135deg, #4dc8ff 0%, #29b6f6 55%, #1c93d6 100%);
 
-            --ledger-line: rgba(148, 176, 199, 0.16);
+            --accent-green: #34a853;
+            --accent-yellow: #f9ab00;
+            --accent-red: #ea4335;
 
-            --success: #4cd964;
-            --success-bg: rgba(76, 217, 100, 0.12);
-            --warning: #ffb020;
-            --warning-bg: rgba(255, 176, 32, 0.12);
-            --error: #ff5566;
-            --error-bg: rgba(255, 85, 102, 0.12);
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --text-tertiary: #80868b;
 
-            --text-primary: #eef4f9;
-            --text-secondary: #93a6b8;
-            --text-tertiary: #647688;
+            --border-color: #dadce0;
+            --border-light: #e8eaed;
 
-            --border-color: rgba(148, 176, 199, 0.10);
+            --success: #34a853;
+            --success-bg: rgba(52, 168, 83, 0.1);
+            --warning: #f9ab00;
+            --warning-bg: rgba(249, 171, 0, 0.1);
+            --error: #ea4335;
+            --error-bg: rgba(234, 67, 53, 0.1);
+            --info: #29b6f6;
+            --info-bg: rgba(41, 182, 246, 0.1);
 
-            --radius-sm: 12px;
-            --radius-md: 16px;
-            --radius-lg: 20px;
-            --radius-xl: 22px;
+            --shadow-sm: 0 1px 2px 0 rgba(60, 64, 67, 0.1), 0 1px 3px 1px rgba(60, 64, 67, 0.08);
+            --shadow-md: 0 1px 3px 0 rgba(60, 64, 67, 0.15), 0 4px 8px 3px rgba(60, 64, 67, 0.1);
+            --shadow-lg: 0 12px 28px rgba(41, 182, 246, 0.16), 0 2px 6px rgba(60, 64, 67, 0.08);
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
 
             --mono: 'JetBrains Mono', 'SFMono-Regular', Menlo, monospace;
 
-            /* skeleton */
-            --sk-base: rgba(148, 176, 199, 0.08);
-            --sk-shine: rgba(148, 176, 199, 0.20);
+            /* skeleton (light theme) */
+            --sk-base: #e6edf7;
+            --sk-shine: #ffffff;
         }
 
         html, body {
@@ -62,36 +68,20 @@
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
-            overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
-        }
-
-        /* faint ledger-grid texture behind everything, nods to a transaction ledger */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-image:
-                radial-gradient(circle at 50% 0%, rgba(46, 166, 255, 0.10) 0%, transparent 55%),
-                repeating-linear-gradient(180deg, transparent 0 27px, var(--ledger-line) 27px 28px);
-            opacity: 0.5;
-            pointer-events: none;
-            z-index: 0;
         }
 
         /* ================================================================
            SPLASH / SKELETON LOADER
-           Mirrors the app's real layout with shimmering placeholder blocks
-           so the Firebase fetch never shows as a bare/blank state.
+           Mirrors this page's own layout (header / reward+time cards /
+           submit card / history list) instead of a generic placeholder.
         ================================================================= */
         .splash {
             position: fixed;
             inset: 0;
             z-index: 999;
             background: var(--bg-primary);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            overflow-y: auto;
             transition: opacity 0.45s ease, visibility 0.45s ease;
         }
 
@@ -99,15 +89,6 @@
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
-        }
-
-        .splash-inner {
-            max-width: 480px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 16px;
-            position: relative;
-            z-index: 1;
         }
 
         .sk {
@@ -122,7 +103,8 @@
             position: absolute;
             inset: 0;
             transform: translateX(-100%);
-            background: linear-gradient(90deg, transparent 0%, var(--sk-shine) 50%, transparent 100%);
+            background: linear-gradient(90deg, transparent 0%, var(--sk-shine) 55%, transparent 100%);
+            opacity: 0.7;
             animation: shimmer 1.6s ease-in-out infinite;
         }
 
@@ -132,105 +114,93 @@
 
         .sk-line { height: 12px; border-radius: 7px; }
 
-        /* -- header row, same geometry as .header-content -- */
         .sk-header-bar {
-            max-width: 480px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-light);
+            padding: 16px 20px;
+        }
+
+        .sk-header-content {
+            max-width: 600px;
             margin: 0 auto;
-            padding: 12px 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid var(--border-color);
         }
 
         .sk-header-left { display: flex; align-items: center; gap: 12px; }
-        .sk-icon-box { width: 42px; height: 42px; border-radius: 13px; flex-shrink: 0; }
+        .sk-brand-icon { width: 42px; height: 42px; border-radius: var(--radius-md); flex-shrink: 0; }
         .sk-header-lines { display: flex; flex-direction: column; gap: 8px; }
-        .sk-chip { width: 74px; height: 34px; border-radius: 24px; flex-shrink: 0; }
+        .sk-user-chip { width: 118px; height: 44px; border-radius: 24px; flex-shrink: 0; }
 
-        /* -- card shell matching .balance-card / .section-card -- */
-        .sk-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-xl);
-            margin-bottom: 16px;
-            padding: 20px;
+        .splash-inner {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px 16px;
         }
 
-        .sk-card-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 18px;
-        }
-
-        .sk-card-left { display: flex; align-items: center; gap: 12px; }
-        .sk-icon-round { width: 46px; height: 46px; border-radius: var(--radius-md); flex-shrink: 0; }
-        .sk-icon-sm { width: 38px; height: 38px; border-radius: var(--radius-sm); flex-shrink: 0; }
-        .sk-pill { width: 68px; height: 26px; border-radius: 20px; flex-shrink: 0; }
-
-        /* -- balance card stat row, same 3-column layout as .stats-row -- */
-        .sk-stats-row {
+        .sk-info-cards {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            padding-top: 16px;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
-        .sk-stat { text-align: center; }
-        .sk-stat-icon { width: 30px; height: 30px; border-radius: 10px; margin: 0 auto 8px; }
-        .sk-stat-line { height: 12px; border-radius: 6px; margin: 0 auto 6px; width: 60%; }
-        .sk-stat-label { height: 8px; border-radius: 5px; margin: 0 auto; width: 75%; }
+        .sk-info-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 18px;
+        }
 
-        /* -- full-width control bar, same height as .form-select / .form-input -- */
-        .sk-input-bar { height: 54px; border-radius: var(--radius-md); }
-        .sk-input-bar.tall { height: 58px; margin-bottom: 12px; }
+        .sk-info-card-icon { width: 40px; height: 40px; border-radius: var(--radius-md); margin-bottom: 14px; }
+        .sk-info-label { width: 70%; height: 9px; border-radius: 5px; margin-bottom: 10px; }
+        .sk-info-value { width: 55%; height: 22px; border-radius: 7px; }
 
-        /* -- quick amount row, same 5-pill layout -- */
-        .sk-quick-row { display: flex; gap: 8px; margin-top: 12px; }
-        .sk-quick-row .sk { flex: 1; height: 42px; border-radius: var(--radius-sm); }
+        .sk-submit-card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-light);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
 
-        /* -- history header + list items -- */
+        .sk-submit-header { height: 78px; }
+        .sk-submit-body { padding: 20px; }
+        .sk-input-bar { height: 50px; border-radius: var(--radius-md); margin-bottom: 16px; }
+        .sk-submit-btn-bar { height: 52px; border-radius: var(--radius-md); margin-top: 4px; }
+
         .sk-history-head {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 10px;
             margin-bottom: 16px;
         }
 
-        .sk-history-left { display: flex; align-items: center; gap: 10px; }
-        .sk-icon-hist { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; }
-        .sk-filter-pill { width: 78px; height: 30px; border-radius: 20px; flex-shrink: 0; }
+        .sk-history-icon { width: 36px; height: 36px; border-radius: var(--radius-sm); flex-shrink: 0; }
 
         .sk-history-item {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
             padding: 16px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .sk-history-top {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 14px;
+            align-items: center;
+            margin-bottom: 12px;
         }
 
-        .sk-method { display: flex; align-items: center; gap: 12px; }
-        .sk-method-icon { width: 44px; height: 44px; border-radius: var(--radius-sm); flex-shrink: 0; }
-        .sk-method-lines { display: flex; flex-direction: column; gap: 7px; }
-        .sk-amount-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-        .sk-amount-line { width: 56px; height: 15px; border-radius: 6px; }
-        .sk-status-pill { width: 58px; height: 18px; border-radius: 20px; }
-        .sk-detail-block { height: 40px; border-radius: var(--radius-sm); }
+        .sk-history-id-lines { display: flex; flex-direction: column; gap: 8px; }
+        .sk-status-pill { width: 64px; height: 22px; border-radius: 20px; }
+        .sk-message-block { height: 38px; border-radius: var(--radius-sm); }
 
         .app-container {
-            position: relative;
-            z-index: 1;
-            max-width: 100%;
             min-height: 100vh;
-            padding-bottom: 108px;
+            padding-bottom: 100px;
             opacity: 0;
             transition: opacity 0.5s ease;
         }
@@ -241,90 +211,66 @@
 
         /* ========== Header ========== */
         .header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(14, 22, 33, 0.86);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-light);
+            padding: 16px 20px;
         }
 
         .header-content {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            max-width: 480px;
+            max-width: 600px;
             margin: 0 auto;
         }
 
-        .header-left {
+        .header-brand {
             display: flex;
             align-items: center;
             gap: 12px;
         }
 
-        .icon-box {
+        .brand-icon {
             width: 42px;
             height: 42px;
-            border-radius: 13px;
             background: var(--accent-gradient);
+            border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 6px 18px rgba(46, 166, 255, 0.30);
-            flex-shrink: 0;
+            box-shadow: 0 6px 16px rgba(41, 182, 246, 0.30);
         }
 
-        .icon-box svg {
+        .brand-icon svg {
             width: 22px;
             height: 22px;
+            fill: white;
         }
 
-        .header-title-wrap {
-            display: flex;
-            flex-direction: column;
-            line-height: 1.2;
-        }
-
-        .header-title {
-            font-size: 16px;
-            font-weight: 800;
+        .brand-text h1 {
+            font-size: 18px;
+            font-weight: 700;
             color: var(--text-primary);
-            letter-spacing: -0.2px;
         }
 
-        .header-subtitle {
-            font-size: 11px;
-            font-weight: 600;
+        .brand-text span {
+            font-size: 12px;
             color: var(--text-tertiary);
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .live-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--success);
-            box-shadow: 0 0 0 3px rgba(76, 217, 100, 0.18);
+            font-weight: 500;
         }
 
         .user-chip {
             display: flex;
             align-items: center;
             gap: 8px;
-            background: var(--bg-card);
-            padding: 6px 12px 6px 6px;
+            background: var(--bg-tertiary);
+            padding: 8px 14px 8px 8px;
             border-radius: 24px;
-            border: 1px solid var(--border-color);
         }
 
         .user-avatar {
-            width: 26px;
-            height: 26px;
+            width: 32px;
+            height: 32px;
             background: var(--accent-gradient);
             border-radius: 50%;
             display: flex;
@@ -333,297 +279,270 @@
         }
 
         .user-avatar svg {
-            width: 13px;
-            height: 13px;
-            fill: #0e1621;
+            width: 18px;
+            height: 18px;
+            fill: white;
         }
 
-        .user-id {
-            font-size: 12px;
-            font-weight: 700;
+        .user-info .user-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .user-info .user-id {
+            font-size: 11px;
+            color: var(--text-tertiary);
             font-family: var(--mono);
-            color: var(--text-secondary);
         }
 
         /* ========== Main Content ========== */
         .main-content {
-            max-width: 480px;
+            max-width: 600px;
             margin: 0 auto;
-            padding: 16px;
+            padding: 20px 16px;
         }
 
-        /* ========== Balance Card — "cash-out ticket" signature ========== */
-        .balance-card {
-            background: var(--bg-card);
-            border-radius: var(--radius-xl);
+        /* ========== Task Info Cards ========== */
+        .info-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
             margin-bottom: 20px;
-            border: 1px solid var(--border-color);
-            position: relative;
-            overflow: visible;
-            box-shadow: 0 20px 44px rgba(0, 0, 0, 0.28);
         }
 
-        .balance-card::before {
+        .info-card {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 18px;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-card::before {
             content: '';
             position: absolute;
-            inset: 0;
-            border-radius: var(--radius-xl);
-            background: var(--card-gradient);
-            pointer-events: none;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
         }
 
-        .balance-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 20px 18px;
-            position: relative;
+        .info-card.reward::before {
+            background: var(--success);
         }
 
-        .balance-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .balance-icon-wrap {
-            width: 46px;
-            height: 46px;
+        .info-card.time::before {
             background: var(--accent-gradient);
+        }
+
+        .info-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .info-card-icon {
+            width: 40px;
+            height: 40px;
             border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 8px 24px rgba(46, 166, 255, 0.25);
             flex-shrink: 0;
         }
 
-        .balance-icon-wrap svg {
-            width: 22px;
-            height: 22px;
-            fill: #0e1621;
+        .info-card-icon svg {
+            width: 20px;
+            height: 20px;
         }
 
-        .balance-text h3 {
+        .info-card-icon.green {
+            background: var(--success-bg);
+        }
+        .info-card-icon.green svg { fill: var(--success); }
+
+        .info-card-icon.blue {
+            background: var(--accent-gradient);
+            box-shadow: 0 6px 14px rgba(41, 182, 246, 0.30);
+        }
+        .info-card-icon.blue svg { fill: #ffffff; }
+
+        .info-card-label {
             font-size: 11px;
             font-weight: 700;
             color: var(--text-tertiary);
             text-transform: uppercase;
-            letter-spacing: 0.7px;
-            margin-bottom: 3px;
+            letter-spacing: 0.5px;
         }
 
-        .balance-amount {
+        .info-card-value {
             font-family: var(--mono);
-            font-size: 30px;
-            font-weight: 700;
-            color: var(--text-primary);
-            letter-spacing: -0.5px;
-            line-height: 1;
-        }
-
-        .balance-amount span {
-            font-size: 18px;
-            color: var(--accent-1);
-        }
-
-        .balance-badge {
-            background: var(--success-bg);
-            padding: 6px 12px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-
-        .balance-badge svg {
-            width: 13px;
-            height: 13px;
-            fill: var(--success);
-        }
-
-        .balance-badge span {
-            font-size: 10px;
+            font-size: 22px;
             font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+
+        .info-card-value.green {
             color: var(--success);
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
         }
 
-        /* perforated ticket-stub divider between balance & stats */
-        .ticket-perforation {
-            position: relative;
-            height: 1px;
-            margin: 0 0 0;
-            background-image: repeating-linear-gradient(90deg, var(--ledger-line) 0 8px, transparent 8px 16px);
+        .info-card-caption {
+            display: block;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            margin-top: 4px;
         }
 
-        .ticket-perforation::before,
-        .ticket-perforation::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            width: 22px;
-            height: 22px;
-            background: var(--bg-primary);
-            border-radius: 50%;
-            transform: translateY(-50%);
-        }
-
-        .ticket-perforation::before { left: -11px; }
-        .ticket-perforation::after { right: -11px; }
-
-        /* Stats Row */
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            position: relative;
-            padding: 16px 20px 20px;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 4px 8px;
-            position: relative;
-        }
-
-        .stat-item:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 8px;
-            bottom: 8px;
-            width: 1px;
-            background: var(--border-color);
-        }
-
-        .stat-icon {
-            width: 30px;
-            height: 30px;
+        /* ========== Submit Form Card ========== */
+        .submit-card {
             background: var(--bg-secondary);
-            border-radius: 10px;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 24px;
+        }
+
+        .submit-card-header {
+            background: var(--accent-gradient);
+            padding: 22px 20px;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-card-header::before {
+            content: '';
+            position: absolute;
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.14);
+            top: -90px;
+            right: -50px;
+        }
+
+        .submit-card-header::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.10);
+            bottom: -60px;
+            left: -30px;
+        }
+
+        .submit-card-header-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.20);
+            border: 1px solid rgba(255, 255, 255, 0.30);
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 8px;
+            margin: 0 auto 10px;
+            position: relative;
         }
 
-        .stat-icon svg {
-            width: 15px;
-            height: 15px;
+        .submit-card-header-icon svg {
+            width: 22px;
+            height: 22px;
+            fill: white;
         }
 
-        .stat-icon.green svg { fill: var(--success); }
-        .stat-icon.yellow svg { fill: var(--warning); }
-        .stat-icon.purple svg { fill: var(--accent-1); }
+        .submit-card-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            position: relative;
+        }
 
-        .stat-value {
-            font-family: var(--mono);
+        .submit-card-header p {
+            font-size: 13px;
+            opacity: 0.92;
+            position: relative;
+        }
+
+        .submit-card-body {
+            padding: 22px 20px;
+        }
+
+        /* Pause Notice */
+        .pause-notice {
+            display: none;
+            text-align: center;
+            padding: 32px 20px;
+        }
+
+        .pause-notice.show {
+            display: block;
+        }
+
+        .pause-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--error-bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .pause-icon svg {
+            width: 32px;
+            height: 32px;
+            fill: var(--error);
+        }
+
+        .pause-notice h3 {
             font-size: 16px;
             font-weight: 700;
             color: var(--text-primary);
-            margin-bottom: 3px;
+            margin-bottom: 8px;
         }
 
-        .stat-label {
-            font-size: 9.5px;
-            font-weight: 700;
-            color: var(--text-tertiary);
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
+        .pause-notice p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
         }
 
-        /* ========== Section Card ========== */
-        .section-card {
-            background: var(--bg-card);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            margin-bottom: 16px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+        /* Form */
+        .form-wrapper {
+            display: none;
         }
 
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
+        .form-wrapper.show {
+            display: block;
         }
 
-        .section-icon {
-            width: 38px;
-            height: 38px;
-            background: linear-gradient(135deg, rgba(46, 166, 255, 0.16) 0%, rgba(46, 166, 255, 0.06) 100%);
-            border-radius: var(--radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid rgba(46, 166, 255, 0.20);
-            flex-shrink: 0;
-        }
-
-        .section-icon svg {
-            width: 19px;
-            height: 19px;
-            fill: var(--accent-1);
-        }
-
-        .section-title-wrap h3 {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 2px;
-        }
-
-        .section-title-wrap p {
-            font-size: 12px;
-            color: var(--text-tertiary);
-        }
-
-        /* ========== Form Elements ========== */
         .form-group {
             margin-bottom: 16px;
         }
 
-        .form-group:last-child {
-            margin-bottom: 0;
-        }
-
         .form-label {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .form-label span {
+            display: block;
             font-size: 13px;
             font-weight: 600;
-            color: var(--text-secondary);
+            color: var(--text-primary);
+            margin-bottom: 8px;
         }
 
-        .form-label small {
-            font-size: 11px;
-            font-family: var(--mono);
-            color: var(--text-tertiary);
-        }
-
-        #min-amount-label {
-            color: var(--error);
-            font-weight: 700;
-        }
-
-        .input-wrapper {
-            position: relative;
-        }
-
-        .form-input,
-        .form-select {
+        .form-input {
             width: 100%;
-            padding: 15px 16px;
-            background: var(--bg-input);
-            border: 1.5px solid var(--border-color);
+            padding: 14px 16px;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
             border-radius: var(--radius-md);
             color: var(--text-primary);
             font-size: 15px;
@@ -633,180 +552,139 @@
             transition: all 0.2s ease;
         }
 
-        .form-input:focus,
-        .form-select:focus {
-            border-color: var(--accent-2);
-            box-shadow: 0 0 0 4px rgba(46, 166, 255, 0.12);
+        .form-input:focus {
+            border-color: var(--accent-blue);
+            background: var(--bg-secondary);
+            box-shadow: 0 0 0 4px var(--info-bg);
         }
 
         .form-input::placeholder {
             color: var(--text-tertiary);
         }
 
-        .form-select {
-            appearance: none;
-            cursor: pointer;
-            padding-right: 48px;
-            color-scheme: dark;
+        .form-input.error {
+            border-color: var(--error);
+            background: var(--error-bg);
         }
 
-        .select-arrow {
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;
-            width: 24px;
-            height: 24px;
-            background: var(--bg-secondary);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .select-arrow svg {
-            width: 14px;
-            height: 14px;
-            fill: var(--text-tertiary);
-        }
-
-        /* Amount Input Special */
-        .amount-input-wrap {
-            position: relative;
-        }
-
-        .amount-input-wrap .form-input {
-            padding-left: 44px;
-            font-family: var(--mono);
-            font-size: 23px;
-            font-weight: 700;
-            letter-spacing: -0.3px;
-        }
-
-        .currency-symbol {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-family: var(--mono);
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--accent-1);
-        }
-
-        /* Quick Amounts */
-        .quick-amounts {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .quick-btn {
-            flex: 1;
-            padding: 12px 8px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            color: var(--text-secondary);
-            font-size: 13px;
-            font-weight: 700;
-            font-family: var(--mono);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .quick-btn:active {
-            transform: scale(0.96);
-        }
-
-        .quick-btn.active {
-            background: rgba(46, 166, 255, 0.14);
-            border-color: var(--accent-2);
-            color: var(--accent-1);
-        }
-
-        /* Error Message */
-        .input-error {
-            border-color: var(--error) !important;
-        }
-
-        .error-message {
+        .field-error {
             display: none;
             align-items: center;
-            gap: 8px;
-            margin-top: 10px;
-            padding: 12px 14px;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 10px 12px;
             background: var(--error-bg);
             border-radius: var(--radius-sm);
-            border: 1px solid rgba(255, 85, 102, 0.2);
         }
 
-        .error-message.show {
+        .field-error.show {
             display: flex;
             animation: shake 0.4s ease;
         }
 
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-6px); }
-            40%, 80% { transform: translateX(6px); }
+            20%, 60% { transform: translateX(-4px); }
+            40%, 80% { transform: translateX(4px); }
         }
 
-        .error-message svg {
-            width: 18px;
-            height: 18px;
+        .field-error svg {
+            width: 16px;
+            height: 16px;
             fill: var(--error);
             flex-shrink: 0;
         }
 
-        .error-message span {
-            font-size: 13px;
+        .field-error span {
+            font-size: 12px;
             font-weight: 500;
             color: var(--error);
         }
 
-        /* Success Message */
-        .success-message {
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 16px 24px;
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+            margin-top: 8px;
+            box-shadow: 0 8px 22px rgba(41, 182, 246, 0.30);
+        }
+
+        .submit-btn:hover {
+            filter: brightness(1.04);
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        .submit-btn:disabled {
+            background: var(--text-tertiary);
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .submit-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .submit-btn .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Success Alert */
+        .success-alert {
             display: none;
-            background: var(--bg-card);
-            border: 1px solid rgba(46, 166, 255, 0.30);
+            background: var(--success-bg);
+            border: 1px solid rgba(52, 168, 83, 0.3);
             border-radius: var(--radius-lg);
             padding: 20px;
-            margin-bottom: 16px;
-            position: relative;
-            overflow: hidden;
+            margin-bottom: 20px;
         }
 
-        .success-message::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(46, 166, 255, 0.12) 0%, transparent 60%);
-            pointer-events: none;
-        }
-
-        .success-message.show {
+        .success-alert.show {
             display: block;
             animation: slideDown 0.4s ease;
         }
 
         @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-16px); }
+            from { opacity: 0; transform: translateY(-12px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .success-content {
+        .success-alert-content {
             display: flex;
             align-items: flex-start;
             gap: 14px;
-            position: relative;
         }
 
-        .success-icon {
+        .success-alert-icon {
             width: 44px;
             height: 44px;
-            background: var(--accent-gradient);
+            background: var(--success);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -814,38 +692,42 @@
             flex-shrink: 0;
         }
 
-        .success-icon svg {
+        .success-alert-icon svg {
             width: 22px;
             height: 22px;
-            fill: #0e1621;
+            fill: white;
         }
 
-        .success-text h4 {
+        .success-alert-text h4 {
             font-size: 15px;
             font-weight: 700;
-            color: var(--text-primary);
+            color: var(--success);
             margin-bottom: 4px;
         }
 
-        .success-text p {
+        .success-alert-text p {
             font-size: 13px;
             color: var(--text-secondary);
             line-height: 1.5;
         }
 
-        .success-text .withdraw-id {
+        .success-id {
             display: inline-block;
-            margin-top: 8px;
+            margin-top: 10px;
             padding: 6px 12px;
-            background: rgba(46, 166, 255, 0.12);
-            border-radius: 8px;
-            font-size: 12px;
+            background: white;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
             font-weight: 700;
-            color: var(--accent-1);
+            color: var(--success);
             font-family: var(--mono);
         }
 
         /* ========== History Section ========== */
+        .history-section {
+            margin-top: 8px;
+        }
+
         .history-header {
             display: flex;
             align-items: center;
@@ -862,8 +744,8 @@
         .history-title-icon {
             width: 36px;
             height: 36px;
-            background: linear-gradient(135deg, rgba(46, 166, 255, 0.16) 0%, rgba(46, 166, 255, 0.05) 100%);
-            border-radius: 10px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-sm);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -872,302 +754,148 @@
         .history-title-icon svg {
             width: 18px;
             height: 18px;
-            fill: var(--accent-1);
+            fill: var(--text-secondary);
         }
 
         .history-title h3 {
             font-size: 15px;
             font-weight: 700;
-        }
-
-        .filter-dropdown {
-            position: relative;
-        }
-
-        .filter-btn {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 14px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            color: var(--text-secondary);
-            font-size: 12px;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .filter-btn svg {
-            width: 14px;
-            height: 14px;
-            fill: currentColor;
-        }
-
-        .filter-btn:active {
-            transform: scale(0.96);
-        }
-
-        .filter-menu {
-            position: absolute;
-            top: calc(100% + 8px);
-            right: 0;
-            background: var(--bg-card-2);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 8px;
-            min-width: 140px;
-            z-index: 50;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-8px);
-            transition: all 0.2s ease;
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
-        }
-
-        .filter-menu.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .filter-option {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background 0.2s ease;
-        }
-
-        .filter-option:hover {
-            background: var(--bg-secondary);
-        }
-
-        .filter-option.active {
-            background: rgba(46, 166, 255, 0.12);
-        }
-
-        .filter-option.active span {
-            color: var(--accent-1);
-        }
-
-        .filter-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-        }
-
-        .filter-dot.all { background: var(--text-tertiary); }
-        .filter-dot.pending { background: var(--warning); }
-        .filter-dot.paid { background: var(--success); }
-        .filter-dot.rejected { background: var(--error); }
-
-        .filter-option span {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-secondary);
+            color: var(--text-primary);
         }
 
         /* History List */
         .history-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .history-item {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
             padding: 16px;
-            transition: all 0.2s ease;
+            border-left: 4px solid;
+            box-shadow: var(--shadow-sm);
         }
 
-        .history-item:active {
-            transform: scale(0.99);
+        .history-item.pending {
+            border-left-color: var(--warning);
         }
 
-        .history-top {
+        .history-item.paid {
+            border-left-color: var(--success);
+        }
+
+        .history-item.rejected {
+            border-left-color: var(--error);
+        }
+
+        .history-item-top {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 14px;
-        }
-
-        .history-method {
-            display: flex;
             align-items: center;
-            gap: 12px;
+            margin-bottom: 10px;
         }
 
-        .method-icon {
-            width: 44px;
-            height: 44px;
-            background: var(--bg-secondary);
-            border-radius: var(--radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid var(--border-color);
-            flex-shrink: 0;
-        }
-
-        .method-icon svg {
-            width: 22px;
-            height: 22px;
-            fill: var(--accent-1);
-        }
-
-        .method-info h4 {
+        .history-item-id {
             font-size: 14px;
             font-weight: 700;
             color: var(--text-primary);
-            margin-bottom: 4px;
+            font-family: var(--mono);
         }
 
-        .method-info span {
+        .history-item-time {
             font-size: 11px;
-            font-family: var(--mono);
             color: var(--text-tertiary);
         }
 
-        .history-amount {
-            text-align: right;
-            flex-shrink: 0;
-        }
-
-        .history-amount h4 {
-            font-family: var(--mono);
-            font-size: 17px;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 6px;
-        }
-
-        .status-badge {
+        .history-item-status {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            padding: 5px 10px;
+            gap: 6px;
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
         }
 
-        .status-badge svg {
-            width: 12px;
-            height: 12px;
+        .history-item-status svg {
+            width: 14px;
+            height: 14px;
             fill: currentColor;
         }
 
-        .status-pending {
+        .history-item-status.pending {
             background: var(--warning-bg);
-            color: var(--warning);
+            color: #b45309;
         }
 
-        .status-paid {
+        .history-item-status.paid {
             background: var(--success-bg);
             color: var(--success);
         }
 
-        .status-rejected {
+        .history-item-status.rejected {
             background: var(--error-bg);
             color: var(--error);
         }
 
-        .history-details {
-            background: var(--bg-secondary);
-            border-radius: var(--radius-sm);
-            padding: 12px 14px;
-        }
-
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-        }
-
-        .detail-row:not(:last-child) {
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .detail-label {
-            font-size: 12px;
-            color: var(--text-tertiary);
-        }
-
-        .detail-value {
-            font-size: 12px;
-            font-weight: 600;
-            font-family: var(--mono);
-            color: var(--text-primary);
-            max-width: 180px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .reject-reason {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin-top: 12px;
-            padding: 12px 14px;
-            background: var(--error-bg);
-            border-radius: var(--radius-sm);
-            border: 1px solid rgba(255, 85, 102, 0.2);
-        }
-
-        .reject-reason svg {
-            width: 18px;
-            height: 18px;
-            fill: var(--error);
-            flex-shrink: 0;
-            margin-top: 1px;
-        }
-
-        .reject-reason p {
-            font-size: 12px;
-            color: var(--error);
+        .history-item-message {
+            font-size: 13px;
+            color: var(--text-secondary);
             line-height: 1.5;
+            padding: 12px;
+            background: var(--bg-primary);
+            border-radius: var(--radius-sm);
+        }
+
+        .history-item.pending .history-item-message {
+            background: var(--warning-bg);
+            color: #92400e;
+        }
+
+        .history-item.paid .history-item-message {
+            background: var(--success-bg);
+            color: #166534;
+        }
+
+        .history-item.rejected .history-item-message {
+            background: var(--error-bg);
+            color: #991b1b;
         }
 
         /* Empty State */
         .empty-state {
             text-align: center;
-            padding: 48px 24px;
+            padding: 40px 24px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
         }
 
         .empty-icon {
-            width: 72px;
-            height: 72px;
-            background: var(--bg-secondary);
+            width: 64px;
+            height: 64px;
+            background: var(--bg-tertiary);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            border: 1px solid var(--border-color);
+            margin: 0 auto 16px;
         }
 
         .empty-icon svg {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             fill: var(--text-tertiary);
         }
 
         .empty-state h4 {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             color: var(--text-primary);
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .empty-state p {
@@ -1175,78 +903,84 @@
             color: var(--text-tertiary);
         }
 
-        /* ========== Submit Button ========== */
-        .submit-section {
+        /* Toast */
+        .toast {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 16px;
-            background: linear-gradient(to top, var(--bg-primary) 55%, transparent);
-            z-index: 100;
-        }
-
-        .submit-btn-wrap {
-            max-width: 480px;
+            bottom: 24px;
+            left: 16px;
+            right: 16px;
+            max-width: 400px;
             margin: 0 auto;
+            background: var(--text-primary);
+            color: white;
+            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            box-shadow: var(--shadow-md);
         }
 
-        .submit-btn {
-            width: 100%;
-            padding: 18px 24px;
-            background: var(--accent-gradient);
-            border: none;
-            border-radius: var(--radius-md);
-            color: #0e1621;
-            font-size: 15px;
-            font-weight: 700;
-            font-family: inherit;
-            cursor: pointer;
+        .toast.show {
+            display: flex;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            transition: all 0.2s ease;
-            box-shadow: 0 8px 32px rgba(46, 166, 255, 0.30);
+            flex-shrink: 0;
         }
 
-        .submit-btn:active {
-            transform: scale(0.98);
+        .toast-icon svg {
+            width: 14px;
+            height: 14px;
+            fill: white;
         }
 
-        .submit-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
+        .toast.success .toast-icon { background: var(--success); }
+        .toast.error .toast-icon { background: var(--error); }
+
+        .toast-text {
+            font-size: 13px;
+            font-weight: 500;
+            flex: 1;
         }
 
-        .submit-btn svg {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
+        .toast-close {
+            padding: 4px;
+            cursor: pointer;
+            opacity: 0.7;
         }
 
-        .submit-btn .spinner {
-            width: 20px;
-            height: 20px;
-            border: 2.5px solid rgba(14, 22, 33, 0.25);
-            border-top-color: #0e1621;
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
+        .toast-close:hover {
+            opacity: 1;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .toast-close svg {
+            width: 18px;
+            height: 18px;
+            fill: white;
         }
 
         /* Responsive */
-        @media (max-width: 380px) {
-            .balance-amount {
-                font-size: 26px;
+        @media (max-width: 400px) {
+            .brand-text span {
+                display: none;
             }
 
-            .stat-value {
-                font-size: 14px;
+            .info-card-value {
+                font-size: 20px;
             }
         }
     </style>
@@ -1254,131 +988,70 @@
 <body>
 
     <!-- ================= SKELETON SPLASH SCREEN ================= -->
-    <!-- Mirrors this page's own layout (header / balance card / method
-         card / amount card / history list) rather than a generic grid,
-         so the loading state already looks like our app. -->
+    <!-- Mirrors this page's own layout (header / reward+time cards /
+         submit card / history list) rather than a generic placeholder. -->
     <div class="splash" id="splash">
-        <!-- header skeleton -->
         <div class="sk-header-bar">
-            <div class="sk-header-left">
-                <div class="sk sk-icon-box"></div>
-                <div class="sk-header-lines">
-                    <div class="sk sk-line" style="width: 110px;"></div>
-                    <div class="sk sk-line" style="width: 74px; height: 9px;"></div>
+            <div class="sk-header-content">
+                <div class="sk-header-left">
+                    <div class="sk sk-brand-icon"></div>
+                    <div class="sk-header-lines">
+                        <div class="sk sk-line" style="width: 120px;"></div>
+                        <div class="sk sk-line" style="width: 78px; height: 9px;"></div>
+                    </div>
                 </div>
+                <div class="sk sk-user-chip"></div>
             </div>
-            <div class="sk sk-chip"></div>
         </div>
 
         <div class="splash-inner">
-            <!-- balance card skeleton -->
-            <div class="sk-card">
-                <div class="sk-card-top">
-                    <div class="sk-card-left">
-                        <div class="sk sk-icon-round"></div>
-                        <div class="sk-header-lines">
-                            <div class="sk sk-line" style="width: 90px; height: 10px;"></div>
-                            <div class="sk sk-line" style="width: 120px; height: 24px;"></div>
-                        </div>
-                    </div>
-                    <div class="sk sk-pill"></div>
+            <div class="sk-info-cards">
+                <div class="sk-info-card">
+                    <div class="sk sk-info-card-icon"></div>
+                    <div class="sk sk-info-label"></div>
+                    <div class="sk sk-info-value"></div>
                 </div>
-                <div class="ticket-perforation"></div>
-                <div class="sk-stats-row">
-                    <div class="sk-stat">
-                        <div class="sk sk-stat-icon"></div>
-                        <div class="sk sk-stat-line"></div>
-                        <div class="sk sk-stat-label"></div>
-                    </div>
-                    <div class="sk-stat">
-                        <div class="sk sk-stat-icon"></div>
-                        <div class="sk sk-stat-line"></div>
-                        <div class="sk sk-stat-label"></div>
-                    </div>
-                    <div class="sk-stat">
-                        <div class="sk sk-stat-icon"></div>
-                        <div class="sk sk-stat-line"></div>
-                        <div class="sk sk-stat-label"></div>
-                    </div>
+                <div class="sk-info-card">
+                    <div class="sk sk-info-card-icon"></div>
+                    <div class="sk sk-info-label"></div>
+                    <div class="sk sk-info-value"></div>
                 </div>
             </div>
 
-            <!-- payment method card skeleton -->
-            <div class="sk-card">
-                <div class="sk-card-top" style="margin-bottom: 20px;">
-                    <div class="sk-card-left">
-                        <div class="sk sk-icon-sm"></div>
-                        <div class="sk-header-lines">
-                            <div class="sk sk-line" style="width: 120px;"></div>
-                            <div class="sk sk-line" style="width: 160px; height: 9px;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="sk sk-input-bar"></div>
-            </div>
-
-            <!-- amount card skeleton -->
-            <div class="sk-card">
-                <div class="sk-card-top" style="margin-bottom: 20px;">
-                    <div class="sk-card-left">
-                        <div class="sk sk-icon-sm"></div>
-                        <div class="sk-header-lines">
-                            <div class="sk sk-line" style="width: 140px;"></div>
-                            <div class="sk sk-line" style="width: 170px; height: 9px;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="sk sk-input-bar tall"></div>
-                <div class="sk-quick-row">
-                    <div class="sk"></div>
-                    <div class="sk"></div>
-                    <div class="sk"></div>
-                    <div class="sk"></div>
-                    <div class="sk"></div>
+            <div class="sk-submit-card">
+                <div class="sk sk-submit-header"></div>
+                <div class="sk-submit-body">
+                    <div class="sk sk-input-bar"></div>
+                    <div class="sk sk-input-bar"></div>
+                    <div class="sk sk-submit-btn-bar"></div>
                 </div>
             </div>
 
-            <!-- history skeleton -->
             <div class="sk-history-head">
-                <div class="sk-history-left">
-                    <div class="sk sk-icon-hist"></div>
-                    <div class="sk sk-line" style="width: 60px;"></div>
-                </div>
-                <div class="sk sk-filter-pill"></div>
+                <div class="sk sk-history-icon"></div>
+                <div class="sk sk-line" style="width: 110px;"></div>
             </div>
 
             <div class="sk-history-item">
                 <div class="sk-history-top">
-                    <div class="sk-method">
-                        <div class="sk sk-method-icon"></div>
-                        <div class="sk-method-lines">
-                            <div class="sk sk-line" style="width: 92px; height: 12px;"></div>
-                            <div class="sk sk-line" style="width: 70px; height: 9px;"></div>
-                        </div>
+                    <div class="sk-history-id-lines">
+                        <div class="sk sk-line" style="width: 90px; height: 12px;"></div>
+                        <div class="sk sk-line" style="width: 100px; height: 9px;"></div>
                     </div>
-                    <div class="sk-amount-side">
-                        <div class="sk sk-amount-line"></div>
-                        <div class="sk sk-status-pill"></div>
-                    </div>
+                    <div class="sk sk-status-pill"></div>
                 </div>
-                <div class="sk sk-detail-block"></div>
+                <div class="sk sk-message-block"></div>
             </div>
 
             <div class="sk-history-item">
                 <div class="sk-history-top">
-                    <div class="sk-method">
-                        <div class="sk sk-method-icon"></div>
-                        <div class="sk-method-lines">
-                            <div class="sk sk-line" style="width: 78px; height: 12px;"></div>
-                            <div class="sk sk-line" style="width: 60px; height: 9px;"></div>
-                        </div>
+                    <div class="sk-history-id-lines">
+                        <div class="sk sk-line" style="width: 90px; height: 12px;"></div>
+                        <div class="sk sk-line" style="width: 80px; height: 9px;"></div>
                     </div>
-                    <div class="sk-amount-side">
-                        <div class="sk sk-amount-line"></div>
-                        <div class="sk sk-status-pill"></div>
-                    </div>
+                    <div class="sk sk-status-pill"></div>
                 </div>
-                <div class="sk sk-detail-block"></div>
+                <div class="sk sk-message-block"></div>
             </div>
         </div>
     </div>
@@ -1387,155 +1060,95 @@
         <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <div class="header-left">
-                    <div class="icon-box">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0e1621" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 6v12M15 9.2c0-1.2-1.3-2.2-3-2.2s-3 1-3 2.2c0 1.8 1.8 2.2 3 2.6 1.5.5 3 1 3 2.7 0 1.2-1.3 2.2-3 2.2s-3-1-3-2.2"/>
-                        </svg>
+                <div class="header-brand">
+                    <div class="brand-icon">
+                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
                     </div>
-                    <div class="header-title-wrap">
-                        <h1 class="header-title">Withdraw Funds</h1>
-                        <span class="header-subtitle"><span class="live-dot"></span>Connected</span>
+                    <div class="brand-text">
+                        <h1>TASK SUBMIT</h1>
+                        <span>Submit & Earn</span>
                     </div>
                 </div>
                 <div class="user-chip">
                     <div class="user-avatar">
                         <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                     </div>
-                    <span class="user-id" id="user-uid">Loading...</span>
+                    <div class="user-info">
+                        <div class="user-name" id="user-name">Loading...</div>
+                        <div class="user-id" id="user-uid">UID: ------</div>
+                    </div>
                 </div>
             </div>
         </header>
 
         <main class="main-content">
-            <!-- Balance Card (cash-out ticket) -->
-            <div class="balance-card">
-                <div class="balance-top">
-                    <div class="balance-info">
-                        <div class="balance-icon-wrap">
-                            <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-                        </div>
-                        <div class="balance-text">
-                            <h3>Available Balance</h3>
-                            <div class="balance-amount"><span>$</span><span id="user-balance">Loading...</span></div>
-                        </div>
-                    </div>
-                    <div class="balance-badge">
-                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                        <span>Active</span>
-                    </div>
-                </div>
-                <div class="ticket-perforation"></div>
-                <div class="stats-row">
-                    <div class="stat-item">
-                        <div class="stat-icon green">
-                            <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
-                        </div>
-                        <div class="stat-value" id="total-withdrawn">$0.00</div>
-                        <div class="stat-label">Withdrawn</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-icon yellow">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                        </div>
-                        <div class="stat-value" id="pending-count">0</div>
-                        <div class="stat-label">Pending</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-icon purple">
-                            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                        </div>
-                        <div class="stat-value" id="completed-count">0</div>
-                        <div class="stat-label">Completed</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Success Message -->
-            <div class="success-message" id="success-message">
-                <div class="success-content">
-                    <div class="success-icon">
+            <!-- Success Alert -->
+            <div class="success-alert" id="success-alert">
+                <div class="success-alert-content">
+                    <div class="success-alert-icon">
                         <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                     </div>
-                    <div class="success-text">
-                        <h4>Withdrawal Submitted!</h4>
-                        <p>Your request is being processed. You'll receive a notification once completed.</p>
-                        <span class="withdraw-id" id="success-withdraw-id">WID000000</span>
+                    <div class="success-alert-text">
+                        <h4>Task Submitted Successfully!</h4>
+                        <p>Your task is now pending review. You'll be notified once it's processed.</p>
+                        <span class="success-id" id="success-id">SUB000000</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Withdrawal Form -->
-            <form id="withdrawForm">
-                <!-- Payment Method -->
-                <div class="section-card">
-                    <div class="section-header">
-                        <div class="section-icon">
-                            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-                        </div>
-                        <div class="section-title-wrap">
-                            <h3>Payment Method</h3>
-                            <p>Select your preferred payout option</p>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="form-label">
-                            <span>Select Method</span>
-                        </div>
-                        <div class="input-wrapper">
-                            <select class="form-select" id="method" required>
-                                <option value="" disabled selected>Choose payment method...</option>
-                            </select>
-                            <div class="select-arrow">
-                                <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
-                            </div>
-                        </div>
-                        <div class="error-message" id="method-error">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                            <span>Please select a payment method</span>
-                        </div>
-                    </div>
-
-                    <div id="dynamic-fields"></div>
-                </div>
-
-                <!-- Amount -->
-                <div class="section-card">
-                    <div class="section-header">
-                        <div class="section-icon">
+            <!-- Task Info Cards -->
+            <div class="info-cards">
+                <div class="info-card reward">
+                    <div class="info-card-header">
+                        <div class="info-card-icon green">
                             <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
                         </div>
-                        <div class="section-title-wrap">
-                            <h3>Withdrawal Amount</h3>
-                            <p>Enter the amount you want to withdraw</p>
-                        </div>
+                        <span class="info-card-label">Task Reward</span>
                     </div>
-
-                    <div class="form-group">
-                        <div class="form-label">
-                            <span>Amount</span>
-                            <small id="min-amount-label">Min: $0.00</small>
-                        </div>
-                        <div class="amount-input-wrap">
-                            <span class="currency-symbol">$</span>
-                            <input type="number" class="form-input" id="amount" step="0.01" min="0.01" placeholder="0.00" required>
-                        </div>
-                        <div class="error-message" id="amount-error">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                            <span id="amount-error-text">Please enter a valid amount</span>
-                        </div>
-
-                        <div class="quick-amounts">
-                            <button type="button" class="quick-btn" data-amount="5">$5</button>
-                            <button type="button" class="quick-btn" data-amount="10">$10</button>
-                            <button type="button" class="quick-btn" data-amount="25">$25</button>
-                            <button type="button" class="quick-btn" data-amount="50">$50</button>
-                            <button type="button" class="quick-btn" data-amount="all">MAX</button>
-                        </div>
-                    </div>
+                    <div class="info-card-value green" id="task-price">$Loading...</div>
+                    <span class="info-card-caption">Credited per approved task</span>
                 </div>
-            </form>
+                <div class="info-card time">
+                    <div class="info-card-header">
+                        <div class="info-card-icon blue">
+                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                        </div>
+                        <span class="info-card-label">Review Time</span>
+                    </div>
+                    <div class="info-card-value" id="review-time">Loading...</div>
+                    <span class="info-card-caption">Typical moderation window</span>
+                </div>
+            </div>
+
+            <!-- Submit Form Card -->
+            <div class="submit-card">
+                <div class="submit-card-header">
+                    <div class="submit-card-header-icon">
+                        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                    </div>
+                    <h2>Submit Your Task</h2>
+                    <p>Fill in the details below to submit your task proof</p>
+                </div>
+                <div class="submit-card-body">
+                    <!-- Pause Notice -->
+                    <div class="pause-notice" id="pause-notice">
+                        <div class="pause-icon">
+                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+                        </div>
+                        <h3>Submissions Paused</h3>
+                        <p>Task submissions are temporarily unavailable. Please check back later.</p>
+                    </div>
+
+                    <!-- Form -->
+                    <form id="taskForm" class="form-wrapper">
+                        <div id="dynamic-fields"></div>
+                        <button type="submit" class="submit-btn" id="submit-btn">
+                            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                            <span>Submit Task</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
 
             <!-- History Section -->
             <div class="history-section">
@@ -1544,31 +1157,7 @@
                         <div class="history-title-icon">
                             <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
                         </div>
-                        <h3>History</h3>
-                    </div>
-                    <div class="filter-dropdown">
-                        <button type="button" class="filter-btn" id="filter-btn">
-                            <span id="filter-label">All</span>
-                            <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
-                        </button>
-                        <div class="filter-menu" id="filter-menu">
-                            <div class="filter-option active" data-filter="all">
-                                <div class="filter-dot all"></div>
-                                <span>All</span>
-                            </div>
-                            <div class="filter-option" data-filter="pending">
-                                <div class="filter-dot pending"></div>
-                                <span>Pending</span>
-                            </div>
-                            <div class="filter-option" data-filter="paid">
-                                <div class="filter-dot paid"></div>
-                                <span>Paid</span>
-                            </div>
-                            <div class="filter-option" data-filter="rejected">
-                                <div class="filter-dot rejected"></div>
-                                <span>Rejected</span>
-                            </div>
-                        </div>
+                        <h3>Your Submissions</h3>
                     </div>
                 </div>
 
@@ -1577,21 +1166,22 @@
                         <div class="empty-icon">
                             <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
                         </div>
-                        <h4>No withdrawals yet</h4>
-                        <p>Your withdrawal history will appear here</p>
+                        <h4>No submissions yet</h4>
+                        <p>Submit your first task above</p>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Submit Button -->
-    <div class="submit-section">
-        <div class="submit-btn-wrap">
-            <button type="submit" class="submit-btn" id="submit-btn" form="withdrawForm">
-                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                <span>Submit Withdrawal</span>
-            </button>
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <div class="toast-icon">
+            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        </div>
+        <span class="toast-text" id="toast-text">Message</span>
+        <div class="toast-close" onclick="hideToast()">
+            <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </div>
     </div>
 
@@ -1605,41 +1195,31 @@
         const urlParams = new URLSearchParams(window.location.search);
         const telegramId = urlParams.get('id');
 
-        // State
-        let currentBalance = 0.080;
-        let methodConfigs = {};
-        let withdrawHistory = [];
-        let currentFilter = 'all';
-
         // Telegram Bot
-        const BOT_TOKEN = "8765841283:AAHEn-pJPcRiMUOm2lkCqEAQRM_1CCeE1Ns";
+        const BOT_TOKEN = "8968747488:AAFo57k9oohFGLWlqy0NhQmHS5EoSZEtK48";
         let adminChatId = "7955518877";
 
+        // State
+        let taskHistory = [];
+
         // DOM Elements
+        const userNameEl = document.getElementById('user-name');
         const userUidEl = document.getElementById('user-uid');
-        const userBalanceEl = document.getElementById('user-balance');
-        const methodSelect = document.getElementById('method');
         const dynamicFields = document.getElementById('dynamic-fields');
-        const amountInput = document.getElementById('amount');
         const submitBtn = document.getElementById('submit-btn');
         const historyContainer = document.getElementById('history-container');
-        const successMessage = document.getElementById('success-message');
-        const filterBtn = document.getElementById('filter-btn');
-        const filterMenu = document.getElementById('filter-menu');
-        const filterLabel = document.getElementById('filter-label');
-        const minAmountLabel = document.getElementById('min-amount-label');
+        const successAlert = document.getElementById('success-alert');
 
         // ================= SPLASH / SKELETON LOADER LOGIC =================
         // Purely presentational: hides the skeleton and reveals the real
-        // page once (a) the initial Firebase reads have all returned at
-        // least once, and (b) a minimum display time has elapsed, so the
-        // transition always feels like one clean, deliberate reveal rather
-        // than fields popping in one by one.
+        // page once the initial Firebase reads have all returned at least
+        // once, and a minimum display time has elapsed, so the reveal is
+        // always one clean transition rather than fields popping in.
         const splashEl = document.getElementById('splash');
         const appContainerEl = document.getElementById('app-container');
         const SPLASH_MIN_MS = 2400;
         const splashStartedAt = Date.now();
-        const loadFlags = { balance: false, methods: false, history: false };
+        const loadFlags = { username: false, settings: false, fields: false, history: false };
 
         function markLoaded(key) {
             loadFlags[key] = true;
@@ -1647,7 +1227,7 @@
         }
 
         function maybeRevealApp() {
-            const allLoaded = loadFlags.balance && loadFlags.methods && loadFlags.history;
+            const allLoaded = loadFlags.username && loadFlags.settings && loadFlags.fields && loadFlags.history;
             if (!allLoaded) return;
 
             const elapsed = Date.now() - splashStartedAt;
@@ -1661,284 +1241,207 @@
 
         // Initialize
         if (telegramId) {
-            userUidEl.textContent = telegramId;
+            userUidEl.textContent = 'UID: ' + telegramId;
             initializeApp();
         } else {
             userUidEl.textContent = 'Not Found';
-            showError('amount', 'Telegram ID not found');
+            showToast('User ID not found', 'error');
             // Nothing to fetch without an ID — reveal after the minimum delay only.
-            loadFlags.balance = true;
-            loadFlags.methods = true;
+            loadFlags.username = true;
+            loadFlags.settings = true;
+            loadFlags.fields = true;
             loadFlags.history = true;
             maybeRevealApp();
         }
 
         function initializeApp() {
-            let balanceFirstLoad = true;
-            let methodsFirstLoad = true;
+            let usernameFirstLoad = true;
+            let settingsFirstLoad = true;
+            let fieldsFirstLoad = true;
             let historyFirstLoad = true;
 
-            // Load balance
-            database.ref('users/' + telegramId + '/balance').on('value', (snapshot) => {
-                currentBalance = snapshot.val() ? parseFloat(snapshot.val()) : 0.00;
-                userBalanceEl.textContent = currentBalance.toFixed(2);
-                if (balanceFirstLoad) { balanceFirstLoad = false; markLoaded('balance'); }
+            // Load user data
+            database.ref('users/' + telegramId + '/username').on('value', (snapshot) => {
+                userNameEl.textContent = snapshot.val() || 'User';
+                if (usernameFirstLoad) { usernameFirstLoad = false; markLoaded('username'); }
             });
 
-            // Load methods
-            database.ref('admin_settings/withdraw_methods').on('value', (snapshot) => {
-                const methods = snapshot.val();
-                methodSelect.innerHTML = '<option value="" disabled selected>Choose payment method...</option>';
-                
-                if (methods) {
-                    methodConfigs = methods;
-                    Object.keys(methods).forEach(key => {
-                        const m = methods[key];
-                        if (m.status === true || m.status === "Active") {
-                            const opt = document.createElement('option');
-                            opt.value = key;
-                            opt.textContent = m.name || key;
-                            opt.dataset.min = m.min_withdraw || 0;
-                            methodSelect.appendChild(opt);
-                        }
-                    });
+            // Load admin settings
+            database.ref('admin_settings').on('value', (snapshot) => {
+                const settings = snapshot.val();
+                if (settings) {
+                    document.getElementById('task-price').textContent = settings.task_price || '$0.00';
+                    document.getElementById('review-time').textContent = settings.report_time || '10 Min';
+                    
+                    if (settings.admin_chat_id) {
+                        adminChatId = settings.admin_chat_id;
+                    }
+
+                    const formWrapper = document.getElementById('taskForm');
+                    const pauseNotice = document.getElementById('pause-notice');
+
+                    if (settings.task_submission_status === true) {
+                        formWrapper.classList.add('show');
+                        pauseNotice.classList.remove('show');
+                        submitBtn.disabled = false;
+                    } else {
+                        formWrapper.classList.remove('show');
+                        pauseNotice.classList.add('show');
+                        submitBtn.disabled = true;
+                    }
                 }
-                if (methodsFirstLoad) { methodsFirstLoad = false; markLoaded('methods'); }
+                if (settingsFirstLoad) { settingsFirstLoad = false; markLoaded('settings'); }
             });
 
-            // Load admin chat ID
-            database.ref('admin_settings/admin_chat_id').on('value', (snap) => {
-                if (snap.val()) adminChatId = snap.val();
+            // Load dynamic fields
+            database.ref('admin_settings/task_custom_fields').on('value', (snapshot) => {
+                const fields = snapshot.val();
+                dynamicFields.innerHTML = '';
+
+                const fieldsArray = fields && Array.isArray(fields) ? fields : [
+                    { label: 'Email Address' },
+                    { label: 'Task Details' }
+                ];
+
+                fieldsArray.forEach((field) => {
+                    const group = document.createElement('div');
+                    group.className = 'form-group';
+
+                    group.innerHTML = `
+                        <label class="form-label">${field.label}</label>
+                        <input type="text" class="form-input task-field" data-label="${field.label}" placeholder="Enter ${field.label}..." required>
+                        <div class="field-error" id="error-${field.label.replace(/\s+/g, '-').toLowerCase()}">
+                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                            <span>Please enter ${field.label}</span>
+                        </div>
+                    `;
+
+                    dynamicFields.appendChild(group);
+
+                    const input = group.querySelector('.form-input');
+                    input.addEventListener('input', () => {
+                        input.classList.remove('error');
+                        group.querySelector('.field-error').classList.remove('show');
+                    });
+                });
+
+                if (fieldsFirstLoad) { fieldsFirstLoad = false; markLoaded('fields'); }
             });
 
             // Load history
-            database.ref('users/' + telegramId + '/withdraw_history').on('value', (snapshot) => {
+            database.ref('users/' + telegramId + '/submitted_tasks').on('value', (snapshot) => {
                 const data = snapshot.val();
-                withdrawHistory = data ? Object.entries(data).map(([key, val]) => ({ id: key, ...val })).reverse() : [];
-                updateStats();
+                taskHistory = data ? Object.entries(data).map(([key, val]) => ({ id: key, ...val })).reverse() : [];
                 renderHistory();
                 if (historyFirstLoad) { historyFirstLoad = false; markLoaded('history'); }
             });
         }
 
-        // Update stats
-        function updateStats() {
-            let totalWithdrawn = 0;
-            let pendingCount = 0;
-            let completedCount = 0;
-
-            withdrawHistory.forEach(item => {
-                if (item.status === 'Paid') {
-                    totalWithdrawn += parseFloat(item.amount);
-                    completedCount++;
-                } else if (item.status === 'Pending') {
-                    pendingCount++;
-                }
-            });
-
-            document.getElementById('total-withdrawn').textContent = '$' + totalWithdrawn.toFixed(2);
-            document.getElementById('pending-count').textContent = pendingCount;
-            document.getElementById('completed-count').textContent = completedCount;
-        }
-
-        // Method change
-        methodSelect.addEventListener('change', function() {
-            hideError('method');
-            dynamicFields.innerHTML = '';
-            
-            const config = methodConfigs[this.value];
-            if (config) {
-                const minAmount = config.min_withdraw ? parseFloat(config.min_withdraw) : 0;
-                minAmountLabel.textContent = `Min: $${minAmount.toFixed(2)}`;
-
-                if (config.fields && Array.isArray(config.fields)) {
-                    config.fields.forEach((field) => {
-                        const group = document.createElement('div');
-                        group.className = 'form-group';
-                        
-                        const label = document.createElement('div');
-                        label.className = 'form-label';
-                        label.innerHTML = `<span>${field.label}</span>`;
-                        
-                        const input = document.createElement('input');
-                        input.type = 'text';
-                        input.className = 'form-input custom-field';
-                        input.dataset.label = field.label;
-                        input.placeholder = `Enter ${field.label}...`;
-                        input.required = true;
-                        
-                        const errorDiv = document.createElement('div');
-                        errorDiv.className = 'error-message';
-                        errorDiv.id = `field-error-${field.label.replace(/\s+/g, '-').toLowerCase()}`;
-                        errorDiv.innerHTML = `
-                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                            <span>Please enter ${field.label}</span>
-                        `;
-                        
-                        group.appendChild(label);
-                        group.appendChild(input);
-                        group.appendChild(errorDiv);
-                        dynamicFields.appendChild(group);
-
-                        input.addEventListener('input', () => {
-                            input.classList.remove('input-error');
-                            errorDiv.classList.remove('show');
-                        });
-                    });
-                }
-            }
-        });
-
-        // Amount input
-        amountInput.addEventListener('input', () => hideError('amount'));
-
-        // Quick amounts
-        document.querySelectorAll('.quick-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                
-                const amount = this.dataset.amount;
-                if (amount === 'all') {
-                    amountInput.value = currentBalance.toFixed(2);
-                } else {
-                    amountInput.value = amount;
-                }
-                hideError('amount');
-            });
-        });
-
-        // Filter dropdown
-        filterBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            filterMenu.classList.toggle('show');
-        });
-
-        document.addEventListener('click', () => {
-            filterMenu.classList.remove('show');
-        });
-
-        document.querySelectorAll('.filter-option').forEach(option => {
-            option.addEventListener('click', function() {
-                document.querySelectorAll('.filter-option').forEach(o => o.classList.remove('active'));
-                this.classList.add('active');
-                currentFilter = this.dataset.filter;
-                filterLabel.textContent = this.querySelector('span').textContent;
-                filterMenu.classList.remove('show');
-                renderHistory();
-            });
-        });
-
-        // Form submit
-        document.getElementById('withdrawForm').addEventListener('submit', function(e) {
+        // Form submission
+        document.getElementById('taskForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             if (!telegramId) {
-                showError('amount', 'Telegram ID is required');
+                showToast('User ID not found', 'error');
                 return;
             }
 
-            const methodKey = methodSelect.value;
-            if (!methodKey) {
-                showError('method', 'Please select a payment method');
-                return;
-            }
+            // Validate fields
+            const inputs = document.querySelectorAll('.task-field');
+            let hasErrors = false;
+            const taskData = {};
 
-            const targetMethodConfig = methodConfigs[methodKey];
-            const methodName = targetMethodConfig.name || methodKey;
-            const minWithdrawLimit = targetMethodConfig.min_withdraw ? parseFloat(targetMethodConfig.min_withdraw) : 0.00;
-
-            // Validate custom fields
-            const customInputs = document.querySelectorAll('.custom-field');
-            let fieldsValid = true;
-            const accountDetails = {};
-
-            customInputs.forEach(input => {
-                if (!input.value.trim()) {
-                    fieldsValid = false;
-                    input.classList.add('input-error');
-                    const errorId = `field-error-${input.dataset.label.replace(/\s+/g, '-').toLowerCase()}`;
+            inputs.forEach(input => {
+                const value = input.value.trim();
+                if (!value) {
+                    hasErrors = true;
+                    input.classList.add('error');
+                    const errorId = `error-${input.dataset.label.replace(/\s+/g, '-').toLowerCase()}`;
                     document.getElementById(errorId)?.classList.add('show');
                 } else {
-                    accountDetails[input.dataset.label] = input.value.trim();
+                    taskData[input.dataset.label] = value;
                 }
             });
 
-            if (!fieldsValid) return;
-
-            const amount = parseFloat(amountInput.value);
-            
-            if (isNaN(amount) || amount <= 0) {
-                showError('amount', 'Please enter a valid amount');
+            if (hasErrors) {
+                showToast('Please fill in all fields', 'error');
                 return;
             }
 
-            if (amount < minWithdrawLimit) {
-                showError('amount', `Minimum withdrawal is $${minWithdrawLimit.toFixed(2)}`);
-                return;
-            }
-
-            if (amount > currentBalance) {
-                showError('amount', 'Insufficient balance');
-                return;
-            }
-
-            submitWithdrawal(methodKey, methodName, accountDetails, amount);
+            submitTask(taskData);
         });
 
-        async function submitWithdrawal(methodKey, methodName, accountDetails, amount) {
-            const originalBtnContent = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<div class="spinner"></div><span>Processing...</span>';
+        async function submitTask(taskData) {
+    const originalContent = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<div class="spinner"></div><span>Submitting...</span>';
 
-            const timestamp = new Date().toLocaleString();
-            const withdrawId = 'WID' + Math.floor(100000 + Math.random() * 900000);
-            
-            const payload = {
-                id: withdrawId,
-                user_id: telegramId,
-                method_key: methodKey,
-                method_name: methodName,
-                account_details: accountDetails,
-                amount: amount,
-                status: "Pending",
-                reject_reason: "",
-                time: timestamp
-            };
+    const timestamp = new Date().toLocaleString();
+    const submissionId = 'SUB' + Math.floor(100000 + Math.random() * 900000);
 
-            try {
-                await database.ref('users/' + telegramId + '/balance').set(currentBalance - amount);
-                await database.ref('users/' + telegramId + '/withdraw_history/' + withdrawId).set(payload);
-                await database.ref('admin_withdraw_requests/' + withdrawId).set(payload);
+    const payload = {
+        id: submissionId,
+        submitted_by: telegramId,
+        account_details: taskData,
+        status: "Pending",
+        reject_reason: "",
+        time: timestamp
+    };
 
-                const primaryWallet = Object.values(accountDetails)[0] || '';
-                
-                const userMsg = `<b>✅ Withdrawal Request Received</b>\n\nWithdraw ID: ${withdrawId}\nMethod: ${methodName}\nAmount: $${amount.toFixed(2)}\nStatus: Pending\n\nYou'll be notified once processed.`;
-                sendTelegramMsg(telegramId, userMsg);
+    try {
+        // ১. সাবমিশন ডেটা সেভ করা
+        await Promise.all([
+            database.ref('users/' + telegramId + '/submitted_tasks/' + submissionId).set(payload),
+            database.ref('admin_pending_tasks/' + submissionId).set(payload)
+        ]);
 
-                const adminMsg = `<b>New Withdrawal Request</b>\n\nWithdraw ID: ${withdrawId}\nMethod: ${methodName}\nAmount: $${amount.toFixed(2)}\nUser: ${telegramId}\nAccount: ${primaryWallet}`;
-                sendTelegramMsg(adminChatId, adminMsg);
-
-                document.getElementById('success-withdraw-id').textContent = withdrawId;
-                successMessage.classList.add('show');
-                
-                document.getElementById('withdrawForm').reset();
-                dynamicFields.innerHTML = '';
-                minAmountLabel.textContent = 'Min: $0.00';
-                document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
-
-                setTimeout(() => {
-                    successMessage.classList.remove('show');
-                }, 6000);
-
-            } catch (error) {
-                console.error(error);
-                showError('amount', 'Failed to submit. Please try again.');
+        // ২. ইউজার stats নোডের pending এবং total_submitted কাউন্টার ১ বাড়িয়ে দেওয়া (Firebase Transaction)
+        await database.ref('users/' + telegramId + '/stats').transaction((currentStats) => {
+            if (currentStats === null) {
+                return {
+                    paid: 0,
+                    pending: 1,
+                    rejected: 0,
+                    total_submitted: 1
+                };
             }
+            
+            return {
+                paid: currentStats.paid || 0,
+                pending: (currentStats.pending || 0) + 1,
+                rejected: currentStats.rejected || 0,
+                total_submitted: (currentStats.total_submitted || 0) + 1
+            };
+        });
 
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalBtnContent;
-        }
+        // Telegram Notifications
+        const firstValue = Object.values(taskData)[0] || '';
+        const userMsg = `✅ Your Task Submitted!\n\nID: ${submissionId}\nStatus: Pending\n\nThis task is still under review. Please wait for the moderation team to verify your submission.`;
+        sendTelegramMsg(telegramId, userMsg);
+
+        const adminMsg = `New Task!\n\nID: ${submissionId}\nUser: ${telegramId}\nDetails: ${firstValue}`;
+        sendTelegramMsg(adminChatId, adminMsg);
+
+        // Show success alert
+        document.getElementById('success-id').textContent = submissionId;
+        successAlert.classList.add('show');
+
+        // Reset form
+        document.getElementById('taskForm').reset();
+        showToast('Task submitted successfully!', 'success');
+
+        setTimeout(() => {
+            successAlert.classList.remove('show');
+        }, 5000);
+
+    } catch (error) {
+        console.error(error);
+        showToast('Submission failed. Try again.', 'error');
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalContent;
+}
 
         function sendTelegramMsg(chatId, text) {
             if (!BOT_TOKEN || !chatId) return;
@@ -1950,109 +1453,75 @@
         }
 
         function renderHistory() {
-            const filtered = currentFilter === 'all' 
-                ? withdrawHistory 
-                : withdrawHistory.filter(item => item.status.toLowerCase() === currentFilter);
-
-            if (filtered.length === 0) {
+            if (taskHistory.length === 0) {
                 historyContainer.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">
                             <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
                         </div>
-                        <h4>No ${currentFilter === 'all' ? '' : currentFilter} withdrawals</h4>
-                        <p>Your withdrawal history will appear here</p>
+                        <h4>No submissions yet</h4>
+                        <p>Submit your first task above</p>
                     </div>
                 `;
                 return;
             }
 
-            historyContainer.innerHTML = filtered.map(item => {
-                const statusClass = item.status.toLowerCase();
-                const statusIcon = getStatusIcon(statusClass);
-                
-                let detailsHtml = '';
-                if (item.account_details) {
-                    detailsHtml = `
-                        <div class="history-details">
-                            ${Object.entries(item.account_details).map(([label, value]) => `
-                                <div class="detail-row">
-                                    <span class="detail-label">${label}</span>
-                                    <span class="detail-value">${value}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
-                }
+            historyContainer.innerHTML = taskHistory.map(item => {
+                let statusClass = 'pending';
+                let statusText = 'Pending';
+                let statusIcon = '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>';
+                let message = 'This task is still under review. Please wait for the moderation team to verify your submission.';
 
-                let rejectHtml = '';
-                if (item.status === 'Rejected' && item.reject_reason) {
-                    rejectHtml = `
-                        <div class="reject-reason">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                            <p>${item.reject_reason}</p>
-                        </div>
-                    `;
+                if (item.status === 'Approved' || item.status === 'Paid') {
+                    statusClass = 'paid';
+                    statusText = 'Paid';
+                    statusIcon = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+                    message = 'Congratulations! This task has been paid and paid. The reward has been added to your balance.';
+                } else if (item.status === 'Rejected') {
+                    statusClass = 'rejected';
+                    statusText = 'Rejected';
+                    statusIcon = '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
+                    message = `This task was rejected. Reason: ${item.reject_reason || 'No reason provided.'}`;
                 }
 
                 return `
-                    <div class="history-item">
-                        <div class="history-top">
-                            <div class="history-method">
-                                <div class="method-icon">
-                                    <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-                                </div>
-                                <div class="method-info">
-                                    <h4>${item.method_name}</h4>
-                                    <span>${item.time}</span>
-                                </div>
+                    <div class="history-item ${statusClass}">
+                        <div class="history-item-top">
+                            <div>
+                                <div class="history-item-id">${item.id}</div>
+                                <div class="history-item-time">${item.time}</div>
                             </div>
-                            <div class="history-amount">
-                                <h4>$${parseFloat(item.amount).toFixed(2)}</h4>
-                                <span class="status-badge status-${statusClass}">
-                                    ${statusIcon}
-                                    ${item.status}
-                                </span>
-                            </div>
+                            <span class="history-item-status ${statusClass}">
+                                ${statusIcon}
+                                ${statusText}
+                            </span>
                         </div>
-                        ${detailsHtml}
-                        ${rejectHtml}
+                        <div class="history-item-message">${message}</div>
                     </div>
                 `;
             }).join('');
         }
 
-        function getStatusIcon(status) {
-            switch(status) {
-                case 'pending':
-                    return '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>';
-                case 'paid':
-                    return '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
-                case 'rejected':
-                    return '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
-                default:
-                    return '';
-            }
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toast-text');
+            const toastIcon = toast.querySelector('.toast-icon svg');
+
+            toast.className = `toast ${type} show`;
+            toastText.textContent = message;
+
+            const icons = {
+                success: '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>',
+                error: '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>'
+            };
+
+            toastIcon.innerHTML = icons[type] || icons.success;
+
+            setTimeout(hideToast, 4000);
         }
 
-        function showError(field, message) {
-            const errorEl = document.getElementById(`${field}-error`);
-            const inputEl = document.getElementById(field);
-            
-            if (field === 'amount') {
-                document.getElementById('amount-error-text').textContent = message;
-            }
-            
-            if (errorEl) errorEl.classList.add('show');
-            if (inputEl) inputEl.classList.add('input-error');
-        }
-
-        function hideError(field) {
-            const errorEl = document.getElementById(`${field}-error`);
-            const inputEl = document.getElementById(field);
-            
-            if (errorEl) errorEl.classList.remove('show');
-            if (inputEl) inputEl.classList.remove('input-error');
+        function hideToast() {
+            document.getElementById('toast').classList.remove('show');
         }
 
         // Telegram Mini App native integration (presentation only — no logic change)

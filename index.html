@@ -303,7 +303,7 @@
             padding: 20px 16px;
         }
 
-        /* ========== Task Info Cards ========== */
+        /* ========== Gmail Info Cards ========== */
         .info-cards {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -1089,24 +1089,24 @@
                         <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                     </div>
                     <div class="success-alert-text">
-                        <h4>Task Submitted Successfully!</h4>
-                        <p>Your task is now pending review. You'll be notified once it's processed.</p>
+                        <h4>Gmail Submitted Successfully!</h4>
+                        <p>Your gmail is now pending review. You'll be notified once it's processed.</p>
                         <span class="success-id" id="success-id">SUB000000</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Task Info Cards -->
+            <!-- Gmail Info Cards -->
             <div class="info-cards">
                 <div class="info-card reward">
                     <div class="info-card-header">
                         <div class="info-card-icon green">
                             <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
                         </div>
-                        <span class="info-card-label">Task Reward</span>
+                        <span class="info-card-label">Gmail Reward</span>
                     </div>
-                    <div class="info-card-value green" id="task-price">$Loading...</div>
-                    <span class="info-card-caption">Credited per approved task</span>
+                    <div class="info-card-value green" id="gmail-price">$Loading...</div>
+                    <span class="info-card-caption">Credited per approved gmail</span>
                 </div>
                 <div class="info-card time">
                     <div class="info-card-header">
@@ -1126,8 +1126,8 @@
                     <div class="submit-card-header-icon">
                         <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                     </div>
-                    <h2>Submit Your Task</h2>
-                    <p>Fill in the details below to submit your task proof</p>
+                    <h2>Submit Your Gmail</h2>
+                    <p>Fill in the details below to submit your gmail proof</p>
                 </div>
                 <div class="submit-card-body">
                     <!-- Pause Notice -->
@@ -1136,15 +1136,15 @@
                             <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
                         </div>
                         <h3>Submissions Paused</h3>
-                        <p>Task submissions are temporarily unavailable. Please check back later.</p>
+                        <p>Gmail submissions are temporarily unavailable. Please check back later.</p>
                     </div>
 
                     <!-- Form -->
-                    <form id="taskForm" class="form-wrapper">
+                    <form id="gmailForm" class="form-wrapper">
                         <div id="dynamic-fields"></div>
                         <button type="submit" class="submit-btn" id="submit-btn">
                             <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                            <span>Submit Task</span>
+                            <span>Submit Gmail</span>
                         </button>
                     </form>
                 </div>
@@ -1167,7 +1167,7 @@
                             <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
                         </div>
                         <h4>No submissions yet</h4>
-                        <p>Submit your first task above</p>
+                        <p>Submit your first gmail above</p>
                     </div>
                 </div>
             </div>
@@ -1200,7 +1200,7 @@
         let adminChatId = "7955518877";
 
         // State
-        let taskHistory = [];
+        let gmailHistory = [];
 
         // DOM Elements
         const userNameEl = document.getElementById('user-name');
@@ -1270,17 +1270,17 @@
             database.ref('admin_settings').on('value', (snapshot) => {
                 const settings = snapshot.val();
                 if (settings) {
-                    document.getElementById('task-price').textContent = settings.task_price || '$0.00';
+                    document.getElementById('gmail-price').textContent = settings.gmail_price || '$0.00';
                     document.getElementById('review-time').textContent = settings.report_time || '10 Min';
                     
                     if (settings.admin_chat_id) {
                         adminChatId = settings.admin_chat_id;
                     }
 
-                    const formWrapper = document.getElementById('taskForm');
+                    const formWrapper = document.getElementById('gmailForm');
                     const pauseNotice = document.getElementById('pause-notice');
 
-                    if (settings.task_submission_status === true) {
+                    if (settings.gmail_submission_status === true) {
                         formWrapper.classList.add('show');
                         pauseNotice.classList.remove('show');
                         submitBtn.disabled = false;
@@ -1294,13 +1294,13 @@
             });
 
             // Load dynamic fields
-            database.ref('admin_settings/task_custom_fields').on('value', (snapshot) => {
+            database.ref('admin_settings/gmail_custom_fields').on('value', (snapshot) => {
                 const fields = snapshot.val();
                 dynamicFields.innerHTML = '';
 
                 const fieldsArray = fields && Array.isArray(fields) ? fields : [
                     { label: 'Email Address' },
-                    { label: 'Task Details' }
+                    { label: 'Gmail Details' }
                 ];
 
                 fieldsArray.forEach((field) => {
@@ -1309,7 +1309,7 @@
 
                     group.innerHTML = `
                         <label class="form-label">${field.label}</label>
-                        <input type="text" class="form-input task-field" data-label="${field.label}" placeholder="Enter ${field.label}..." required>
+                        <input type="text" class="form-input gmail-field" data-label="${field.label}" placeholder="Enter ${field.label}..." required>
                         <div class="field-error" id="error-${field.label.replace(/\s+/g, '-').toLowerCase()}">
                             <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
                             <span>Please enter ${field.label}</span>
@@ -1329,16 +1329,16 @@
             });
 
             // Load history
-            database.ref('users/' + telegramId + '/submitted_tasks').on('value', (snapshot) => {
+            database.ref('users/' + telegramId + '/submitted_gmails').on('value', (snapshot) => {
                 const data = snapshot.val();
-                taskHistory = data ? Object.entries(data).map(([key, val]) => ({ id: key, ...val })).reverse() : [];
+                gmailHistory = data ? Object.entries(data).map(([key, val]) => ({ id: key, ...val })).reverse() : [];
                 renderHistory();
                 if (historyFirstLoad) { historyFirstLoad = false; markLoaded('history'); }
             });
         }
 
         // Form submission
-        document.getElementById('taskForm').addEventListener('submit', function(e) {
+        document.getElementById('gmailForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
             if (!telegramId) {
@@ -1347,9 +1347,9 @@
             }
 
             // Validate fields
-            const inputs = document.querySelectorAll('.task-field');
+            const inputs = document.querySelectorAll('.gmail-field');
             let hasErrors = false;
-            const taskData = {};
+            const gmailData = {};
 
             inputs.forEach(input => {
                 const value = input.value.trim();
@@ -1359,7 +1359,7 @@
                     const errorId = `error-${input.dataset.label.replace(/\s+/g, '-').toLowerCase()}`;
                     document.getElementById(errorId)?.classList.add('show');
                 } else {
-                    taskData[input.dataset.label] = value;
+                    gmailData[input.dataset.label] = value;
                 }
             });
 
@@ -1368,10 +1368,10 @@
                 return;
             }
 
-            submitTask(taskData);
+            submitGmail(gmailData);
         });
 
-        async function submitTask(taskData) {
+        async function submitGmail(gmailData) {
     const originalContent = submitBtn.innerHTML;
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<div class="spinner"></div><span>Submitting...</span>';
@@ -1382,7 +1382,7 @@
     const payload = {
         id: submissionId,
         submitted_by: telegramId,
-        account_details: taskData,
+        account_details: gmailData,
         status: "Pending",
         reject_reason: "",
         time: timestamp
@@ -1391,8 +1391,8 @@
     try {
         // ১. সাবমিশন ডেটা সেভ করা
         await Promise.all([
-            database.ref('users/' + telegramId + '/submitted_tasks/' + submissionId).set(payload),
-            database.ref('admin_pending_tasks/' + submissionId).set(payload)
+            database.ref('users/' + telegramId + '/submitted_gmails/' + submissionId).set(payload),
+            database.ref('admin_pending_gmails/' + submissionId).set(payload)
         ]);
 
         // ২. ইউজার stats নোডের pending এবং total_submitted কাউন্টার ১ বাড়িয়ে দেওয়া (Firebase Transaction)
@@ -1415,11 +1415,11 @@
         });
 
         // Telegram Notifications
-        const firstValue = Object.values(taskData)[0] || '';
-        const userMsg = `✅ Your Task Submitted!\n\nID: ${submissionId}\nStatus: Pending\n\nThis task is still under review. Please wait for the moderation team to verify your submission.`;
+        const firstValue = Object.values(gmailData)[0] || '';
+        const userMsg = `✅ Your Gmail Submitted!\n\nID: ${submissionId}\nStatus: Pending\n\nThis gmail is still under review. Please wait for the moderation team to verify your submission.`;
         sendTelegramMsg(telegramId, userMsg);
 
-        const adminMsg = `New Task!\n\nID: ${submissionId}\nUser: ${telegramId}\nDetails: ${firstValue}`;
+        const adminMsg = `New Gmail!\n\nID: ${submissionId}\nUser: ${telegramId}\nDetails: ${firstValue}`;
         sendTelegramMsg(adminChatId, adminMsg);
 
         // Show success alert
@@ -1427,8 +1427,8 @@
         successAlert.classList.add('show');
 
         // Reset form
-        document.getElementById('taskForm').reset();
-        showToast('Task submitted successfully!', 'success');
+        document.getElementById('gmailForm').reset();
+        showToast('Gmail submitted successfully!', 'success');
 
         setTimeout(() => {
             successAlert.classList.remove('show');
@@ -1453,35 +1453,35 @@
         }
 
         function renderHistory() {
-            if (taskHistory.length === 0) {
+            if (gmailHistory.length === 0) {
                 historyContainer.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">
                             <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
                         </div>
                         <h4>No submissions yet</h4>
-                        <p>Submit your first task above</p>
+                        <p>Submit your first gmail above</p>
                     </div>
                 `;
                 return;
             }
 
-            historyContainer.innerHTML = taskHistory.map(item => {
+            historyContainer.innerHTML = gmailHistory.map(item => {
                 let statusClass = 'pending';
                 let statusText = 'Pending';
                 let statusIcon = '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>';
-                let message = 'This task is still under review. Please wait for the moderation team to verify your submission.';
+                let message = 'This gmail is still under review. Please wait for the moderation team to verify your submission.';
 
                 if (item.status === 'Approved' || item.status === 'Paid') {
                     statusClass = 'paid';
                     statusText = 'Paid';
                     statusIcon = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
-                    message = 'Congratulations! This task has been paid and paid. The reward has been added to your balance.';
+                    message = 'Congratulations! This gmail has been paid and paid. The reward has been added to your balance.';
                 } else if (item.status === 'Rejected') {
                     statusClass = 'rejected';
                     statusText = 'Rejected';
                     statusIcon = '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
-                    message = `This task was rejected. Reason: ${item.reject_reason || 'No reason provided.'}`;
+                    message = `This gmail was rejected. Reason: ${item.reject_reason || 'No reason provided.'}`;
                 }
 
                 return `
@@ -1533,4 +1533,4 @@
         }
     </script>
 </body>
-    </html>
+</html>
